@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEE STORE</title>
+    <style>
+        body {
+            /* Ganti 'anime.jpg' dengan link foto latar belakang Anda */
+            background: linear-gradient(rgba(3, 7, 18, 0.3), rgba(3, 7, 18, 0.3)), 
+                        url('anime.jpg') no-repeat center center fixed;
+            background-size: cover;
+            
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 320px;
+            height: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Profil Utama (Posisi di atas persis seperti Kiwolasu) */
+        .profile-section {
+            position: absolute;
+            top: -100px;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 2px solid #00f0ff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 6px auto;
+            background: rgba(0, 240, 255, 0.1);
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #00f0ff;
+        }
+
+        .profile-section h1 {
+            font-size: 1rem;
+            letter-spacing: 2px;
+            margin: 0 0 2px 0;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+        }
+
+        .profile-section p {
+            font-size: 0.55rem;
+            color: #00f0ff;
+            letter-spacing: 1px;
+            margin: 0;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+        }
+
+        /* Area Menu (Diturunkan posisinya agar tidak terlalu menempel ke ZS) */
+        .menu-grid {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 150px;
+        }
+
+        /* Lingkaran Luar & Garis (Pusat putaran dikunci tepat di tengah 130px 130px) */
+        .rotating-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-origin: 130px 130px;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Garis Penghubung (SVG) */
+        .lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .lines line {
+            stroke: rgba(0, 240, 255, 0.6);
+            stroke-width: 2;
+        }
+
+        /* Gaya Tombol Lingkaran Samping */
+        .node-btn {
+            position: absolute;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: rgba(3, 15, 30, 0.9);
+            border: 2px solid #00f0ff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 0.55rem;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            z-index: 2;
+            padding: 4px;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+
+        .node-btn:hover {
+            background: rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.9);
+            transform: scale(1.05);
+        }
+
+        /* Teks di dalam tombol agar tetap tegak lurus */
+        .node-btn span {
+            display: inline-block;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Posisi Tombol Mengelilingi Titik Tengah (130, 130) */
+        .btn-top { top: -15px; left: 97px; }
+        .btn-right { top: 97px; right: -15px; }
+        .btn-bottom { bottom: -15px; left: 97px; }
+        .btn-left { top: 97px; left: -15px; }
+
+
+        /* Tombol Tengah (Utama / Diam) */
+        .btn-center {
+            position: absolute;
+            top: 90px;
+            left: 90px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(5, 25, 45, 0.95);
+            border: 2px solid #00f0ff;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.8);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: bold;
+            text-align: center;
+            z-index: 5;
+            cursor: default;
+        }
+
+        .play-icon {
+            font-size: 1.1rem;
+            margin-bottom: 2px;
+        }
+
+        /* Pop-up / Modal Tampil Menutupi Area Atas */
+        .modal {
+            display: none;
+            position: absolute;
+            top: -300px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 270px;
+            background: rgba(3, 15, 30, 0.95);
+            border: 2px solid #00f0ff;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: #00f0ff;
+            font-size: 1rem;
+        }
+
+        .modal-content p {
+            font-size: 0.75rem;
+            color: #b0c4de;
+            margin-bottom: 15px;
+        }
+
+        .modal-btn {
+            display: block;
+            background: rgba(0, 240, 255, 0.15);
+            border: 1px solid #00f0ff;
+            color: #fff;
+            padding: 8px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.75rem;
+            margin-bottom: 5px;
+            transition: 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: rgba(0, 240, 255, 0.4);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Bagian Profil Atas -->
+        <div class="profile-section">
+            <div class="avatar">ZS</div>
+            <h1>ZEE STORE</h1>
+            <p>OFFICIAL STORE</p>
+        </div>
+
+        <!-- Area Menu -->
+        <div class="menu-grid">
+            <!-- POP-UP MODAL 1: SCRIPT -->
+            <div id="scriptModal" class="modal">
+                <div class="modal-content">
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                    <h3>SCRIPT V2.0</h3>
+                    <p>Silakan klik tombol di bawah untuk mengakses file script.</p>
+                    <a href="https://move2link.co/Scriptku" class="modal-btn" target="_blank">BUKA SCRIPT</a>
+                </div>
+            </div>
+
+            <!-- POP-UP MODAL 2: GG x ZEE STORE -->
+            <div id="ggModal" class="modal">
+                <div class="modal-content">
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                    <h3>GG x ZEE STORE</h3>
+                    <p>Akses tautan eksklusif game modding di sini.</p>
+                    <a href="https://move2link.co/GGxZeeStore" class="modal-btn" target="_blank">MENU GG</a>
+                </div>
+            </div>
+
+            <!-- POP-UP MODAL 3: WHATSAPP -->
+            <div id="waModal" class="modal">
+                <div class="modal-content">
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                    <h3>WHATSAPP ADMIN</h3>
+                    <p>Hubungi kami langsung via WhatsApp.</p>
+                    <a href="https://wa.me/6281330549762" class="modal-btn" target="_blank">CHAT WHATSAPP</a>
+                </div>
+            </div>
+
+            <!-- POP-UP MODAL 4: YOUTUBE -->
+            <div id="ytModal" class="modal">
+                <div class="modal-content">
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                    <h3>YOUTUBE CHANNEL</h3>
+                    <p>Pantau terus video dan pembaruan terbaru di YouTube.</p>
+                    <a href="https://youtube.com/@zeestore02?si=-P68lFcBBRisooZu" class="modal-btn" target="_blank">BUKA YOUTUBE</a>
+                </div>
+            </div>
+
+            <!-- Lingkaran Luar & Garis (Berputar Bersamaan pada Titik Pusat yang Sama) -->
+            <div class="rotating-ring" id="ring">
+                <svg class="lines">
+                    <line x1="130" y1="130" x2="130" y2="32.5" />
+                    <line x1="130" y1="130" x2="32.5" y2="130" />
+                    <line x1="130" y1="130" x2="227.5" y2="130" />
+                    <line x1="130" y1="130" x2="130" y2="227.5" />
+                </svg>
+
+                <div class="node-btn btn-top" onclick="selectMenu('scriptModal', 0)">
+                    <span>⚡<br>SCRIPT V2.0</span>
+                </div>
+
+                <div class="node-btn btn-right" onclick="selectMenu('waModal', -90)">
+                    <span>💬<br>WHATSAPP</span>
+                </div>
+
+                <div class="node-btn btn-bottom" onclick="selectMenu('ytModal', 180)">
+                    <span>▶️<br>YOUTUBE</span>
+                </div>
+
+                <div class="node-btn btn-left" onclick="selectMenu('ggModal', 90)">
+                    <span>🎮<br>GGxZeeStore</span>
+                </div>
+            </div>
+
+            <!-- Tombol Tengah (Diam) -->
+            <div class="node-btn btn-center">
+                <span class="play-icon">🇮🇩</span>
+                ZEE STORE
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRotation = 0;
+
+        function selectMenu(modalId, targetAngle) {
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+
+            const ring = document.getElementById('ring');
+            currentRotation = targetAngle;
+            
+            // Putar ring dan garis dengan poros tepat di tengah (130px 130px)
+            ring.style.transform = `rotate(${currentRotation}deg)`;
+
+            // Imbangi putaran teks agar tetap tegak lurus
+            document.querySelectorAll('.rotating-ring span').forEach(span => {
+                span.style.transform = `rotate(${-currentRotation}deg)`;
+            });
+
+            setTimeout(() => {
+                document.getElementById(modalId).style.display = 'block';
+            }, 500);
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+            
+            const ring = document.getElementById('ring');
+            ring.style.transform = 'rotate(0deg)';
+            
+            document.querySelectorAll('.rotating-ring span').forEach(span => {
+                span.style.transform = 'rotate(0deg)';
+            });
+            
+            currentRotation = 0;
+        }
+    </script>
+
+</body>
+</html>
